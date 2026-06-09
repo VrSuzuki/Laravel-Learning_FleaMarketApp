@@ -12,7 +12,7 @@
       <img class="profile-head__avatar" src="{{ $user->avatar_url }}" alt="">
       <div>
         <h1 class="section-title">{{ $user->display_name }}</h1>
-        <p style="color: var(--muted);">@{{ $user->handle ?: 'user' }}</p>
+        <p style="color: var(--muted);">{{ '@'.($user->handle ?: 'user') }}</p>
         <div class="stat-row">
           @if($user->show_following_count || $isOwner)
             <a href="{{ route('profiles.following', $user) }}">フォロー数 {{ number_format($user->following()->count()) }}</a>

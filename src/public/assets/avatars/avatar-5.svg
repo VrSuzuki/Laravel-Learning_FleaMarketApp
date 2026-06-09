@@ -1,5 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Avatar">
-  <rect width="160" height="160" rx="32" fill="#091827"/>
-  <circle cx="80" cy="62" r="34" fill="#dbe7ff"/>
-  <path d="M34 150c8-36 34-54 46-54s38 18 46 54z" fill="#20c7d2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Digital avatar blue">
+  <defs>
+    <linearGradient id="g" x1="18" y1="18" x2="142" y2="142" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#091827"/>
+      <stop offset="1" stop-color="#1b2f64"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="32" fill="url(#g)"/>
+  <path d="M34 46h28l18-18 18 18h28M34 112h28l18 18 18-18h28" fill="none" stroke="#407ff5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="80" cy="68" r="34" fill="#dbe7ff"/>
+  <path d="M40 142c10-31 29-49 40-49s30 18 40 49z" fill="#407ff5"/>
+  <circle cx="68" cy="67" r="5" fill="#101624"/>
+  <circle cx="92" cy="67" r="5" fill="#101624"/>
+  <path d="M65 83c9 8 21 8 30 0" fill="none" stroke="#101624" stroke-width="5" stroke-linecap="round"/>
 </svg>

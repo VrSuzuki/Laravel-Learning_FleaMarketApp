@@ -1,5 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Avatar">
-  <rect width="160" height="160" rx="32" fill="#101624"/>
-  <circle cx="80" cy="66" r="34" fill="#ff637d"/>
-  <path d="M28 150c10-32 35-50 52-50s42 18 52 50z" fill="#4bdca8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Digital avatar coral">
+  <defs>
+    <linearGradient id="g" x1="16" y1="144" x2="144" y2="16" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101624"/>
+      <stop offset="1" stop-color="#3a1223"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="32" fill="url(#g)"/>
+  <path d="M24 52h30l13-16h26l13 16h30M24 110h34l12 16h20l12-16h34" fill="none" stroke="#ff637d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".78"/>
+  <circle cx="80" cy="67" r="36" fill="#ffe4e9"/>
+  <path d="M38 142c10-30 30-48 42-48s32 18 42 48z" fill="#ff637d"/>
+  <path d="M58 61h16M86 61h16" stroke="#101624" stroke-width="6" stroke-linecap="round"/>
+  <path d="M68 84h24" stroke="#101624" stroke-width="5" stroke-linecap="round"/>
 </svg>

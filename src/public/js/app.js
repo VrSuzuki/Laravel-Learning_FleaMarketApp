@@ -48,6 +48,32 @@ document.addEventListener('click', event => {
   }
 });
 
+document.querySelectorAll('[data-gallery]').forEach(gallery => {
+  const main = gallery.querySelector('[data-gallery-main]');
+  const thumbs = [...gallery.querySelectorAll('[data-gallery-thumb]')];
+  const prev = gallery.querySelector('[data-gallery-prev]');
+  const next = gallery.querySelector('[data-gallery-next]');
+  let currentIndex = 0;
+
+  const show = index => {
+    if (!main || !thumbs.length) return;
+    currentIndex = (index + thumbs.length) % thumbs.length;
+    const image = thumbs[currentIndex].querySelector('img');
+    main.src = image.src;
+    main.alt = image.alt;
+    thumbs.forEach((thumb, thumbIndex) => {
+      thumb.classList.toggle('is-active', thumbIndex === currentIndex);
+    });
+  };
+
+  thumbs.forEach((thumb, index) => {
+    thumb.addEventListener('click', () => show(index));
+  });
+
+  if (prev) prev.addEventListener('click', () => show(currentIndex - 1));
+  if (next) next.addEventListener('click', () => show(currentIndex + 1));
+});
+
 const imageTransfers = new WeakMap();
 
 document.querySelectorAll('[data-image-cropper]').forEach(wrapper => {
@@ -59,7 +85,7 @@ document.querySelectorAll('[data-image-cropper]').forEach(wrapper => {
     if (!file) return;
 
     const cropped = await openImageCropper(file, {
-      aspect: Number(wrapper.dataset.aspect || 1),
+      aspect: fixedAspect(wrapper.dataset.aspect),
       maxWidth: Number(wrapper.dataset.maxWidth || 720),
       maxHeight: Number(wrapper.dataset.maxHeight || 720),
     });
@@ -93,9 +119,9 @@ document.querySelectorAll('[data-image-repeater]').forEach(wrapper => {
       }
 
       const cropped = await openImageCropper(file, {
-        aspect: 16 / 10,
-        maxWidth: 1280,
-        maxHeight: 900,
+        aspect: fixedAspect(wrapper.dataset.aspect),
+        maxWidth: 1600,
+        maxHeight: 1600,
       });
 
       if (!cropped) continue;
@@ -111,16 +137,32 @@ document.querySelectorAll('[data-image-repeater]').forEach(wrapper => {
   });
 });
 
+function fixedAspect(value) {
+  const aspect = Number(value);
+
+  return Number.isFinite(aspect) && aspect > 0 ? aspect : null;
+}
+
 function openImageCropper(file, options) {
   return new Promise(resolve => {
     const url = URL.createObjectURL(file);
+    const aspect = options.aspect;
     const modal = document.createElement('div');
     modal.className = 'modal-backdrop crop-modal';
     modal.innerHTML = `
       <div class="modal-card modal-card--crop" role="dialog" aria-modal="true" aria-label="画像クロップ">
         <div class="crop-stage">
           <img src="${url}" alt="">
-          <div class="crop-box" tabindex="0"></div>
+          <div class="crop-box" tabindex="0">
+            <span class="crop-box__handle crop-box__handle--nw" data-crop-handle="nw"></span>
+            <span class="crop-box__handle crop-box__handle--n" data-crop-handle="n"></span>
+            <span class="crop-box__handle crop-box__handle--ne" data-crop-handle="ne"></span>
+            <span class="crop-box__handle crop-box__handle--e" data-crop-handle="e"></span>
+            <span class="crop-box__handle crop-box__handle--se" data-crop-handle="se"></span>
+            <span class="crop-box__handle crop-box__handle--s" data-crop-handle="s"></span>
+            <span class="crop-box__handle crop-box__handle--sw" data-crop-handle="sw"></span>
+            <span class="crop-box__handle crop-box__handle--w" data-crop-handle="w"></span>
+          </div>
         </div>
         <div class="form-actions crop-actions">
           <button class="button button--primary" type="button" data-crop-apply>クロップ</button>
@@ -132,57 +174,186 @@ function openImageCropper(file, options) {
 
     const img = modal.querySelector('img');
     const box = modal.querySelector('.crop-box');
+    const minSize = 64;
+    let action = null;
+
     const cleanup = value => {
       URL.revokeObjectURL(url);
       modal.remove();
       resolve(value);
     };
 
-    img.addEventListener('load', () => {
-      const rect = img.getBoundingClientRect();
-      const aspect = options.aspect || rect.width / rect.height;
-      let boxWidth = rect.width * 0.72;
-      let boxHeight = boxWidth / aspect;
-
-      if (boxHeight > rect.height * 0.72) {
-        boxHeight = rect.height * 0.72;
-        boxWidth = boxHeight * aspect;
-      }
-
-      box.style.width = `${boxWidth}px`;
-      box.style.height = `${boxHeight}px`;
-      box.style.left = `${(rect.width - boxWidth) / 2}px`;
-      box.style.top = `${(rect.height - boxHeight) / 2}px`;
+    const readBox = () => ({
+      left: parseFloat(box.style.left || 0),
+      top: parseFloat(box.style.top || 0),
+      width: parseFloat(box.style.width || box.offsetWidth),
+      height: parseFloat(box.style.height || box.offsetHeight),
     });
 
-    let dragging = false;
-    let startX = 0;
-    let startY = 0;
-    let startLeft = 0;
-    let startTop = 0;
+    const imageSize = () => ({
+      width: img.getBoundingClientRect().width,
+      height: img.getBoundingClientRect().height,
+    });
+
+    const normalizeBox = next => {
+      const size = imageSize();
+      let width = Math.max(minSize, next.width);
+      let height = Math.max(minSize, next.height);
+
+      if (aspect) {
+        width = Math.min(width, size.width);
+        height = width / aspect;
+
+        if (height > size.height) {
+          height = size.height;
+          width = height * aspect;
+        }
+      } else {
+        width = Math.min(width, size.width);
+        height = Math.min(height, size.height);
+      }
+
+      return {
+        left: Math.max(0, Math.min(next.left, size.width - width)),
+        top: Math.max(0, Math.min(next.top, size.height - height)),
+        width,
+        height,
+      };
+    };
+
+    const applyBox = next => {
+      const normalized = normalizeBox(next);
+      box.style.left = `${normalized.left}px`;
+      box.style.top = `${normalized.top}px`;
+      box.style.width = `${normalized.width}px`;
+      box.style.height = `${normalized.height}px`;
+    };
+
+    const boxAfterMove = event => {
+      const start = action.startBox;
+      return {
+        left: start.left + event.clientX - action.startX,
+        top: start.top + event.clientY - action.startY,
+        width: start.width,
+        height: start.height,
+      };
+    };
+
+    const boxAfterResize = event => {
+      const handle = action.handle;
+      const dx = event.clientX - action.startX;
+      const dy = event.clientY - action.startY;
+      const start = action.startBox;
+
+      if (aspect) {
+        const anchorRight = start.left + start.width;
+        const anchorBottom = start.top + start.height;
+        const verticalOnly = !handle.includes('e') && !handle.includes('w');
+        const nextHeight = handle.includes('n') ? start.height - dy : start.height + dy;
+        let width = verticalOnly
+          ? nextHeight * aspect
+          : handle.includes('w')
+            ? start.width - dx
+            : start.width + dx;
+        width = Math.max(minSize, width);
+        const height = width / aspect;
+
+        return {
+          left: handle.includes('w') ? anchorRight - width : start.left,
+          top: handle.includes('n') ? anchorBottom - height : start.top,
+          width,
+          height,
+        };
+      }
+
+      let left = start.left;
+      let top = start.top;
+      let width = start.width;
+      let height = start.height;
+
+      if (handle.includes('w')) {
+        left += dx;
+        width -= dx;
+      }
+
+      if (handle.includes('e')) width += dx;
+
+      if (handle.includes('n')) {
+        top += dy;
+        height -= dy;
+      }
+
+      if (handle.includes('s')) height += dy;
+
+      if (width < minSize) {
+        if (handle.includes('w')) left -= minSize - width;
+        width = minSize;
+      }
+
+      if (height < minSize) {
+        if (handle.includes('n')) top -= minSize - height;
+        height = minSize;
+      }
+
+      return { left, top, width, height };
+    };
+
+    img.addEventListener('load', () => {
+      const size = imageSize();
+
+      if (aspect) {
+        let width = size.width * 0.72;
+        let height = width / aspect;
+
+        if (height > size.height * 0.72) {
+          height = size.height * 0.72;
+          width = height * aspect;
+        }
+
+        applyBox({
+          left: (size.width - width) / 2,
+          top: (size.height - height) / 2,
+          width,
+          height,
+        });
+      } else {
+        applyBox({
+          left: size.width * 0.14,
+          top: size.height * 0.14,
+          width: size.width * 0.72,
+          height: size.height * 0.72,
+        });
+      }
+    });
 
     box.addEventListener('pointerdown', event => {
-      dragging = true;
-      startX = event.clientX;
-      startY = event.clientY;
-      startLeft = parseFloat(box.style.left || 0);
-      startTop = parseFloat(box.style.top || 0);
+      const handle = event.target.closest('[data-crop-handle]');
+      action = {
+        type: handle ? 'resize' : 'move',
+        handle: handle ? handle.dataset.cropHandle : null,
+        startX: event.clientX,
+        startY: event.clientY,
+        startBox: readBox(),
+      };
+      event.preventDefault();
       box.setPointerCapture(event.pointerId);
     });
 
     box.addEventListener('pointermove', event => {
-      if (!dragging) return;
-      const imgRect = img.getBoundingClientRect();
-      const boxRect = box.getBoundingClientRect();
-      const nextLeft = Math.max(0, Math.min(startLeft + event.clientX - startX, imgRect.width - boxRect.width));
-      const nextTop = Math.max(0, Math.min(startTop + event.clientY - startY, imgRect.height - boxRect.height));
-      box.style.left = `${nextLeft}px`;
-      box.style.top = `${nextTop}px`;
+      if (!action) return;
+
+      applyBox(action.type === 'resize' ? boxAfterResize(event) : boxAfterMove(event));
     });
 
-    box.addEventListener('pointerup', () => {
-      dragging = false;
-    });
+    const stopAction = event => {
+      action = null;
+      if (box.hasPointerCapture(event.pointerId)) {
+        box.releasePointerCapture(event.pointerId);
+      }
+    };
+
+    box.addEventListener('pointerup', stopAction);
+    box.addEventListener('pointercancel', stopAction);
 
     modal.querySelector('[data-crop-cancel]').addEventListener('click', () => cleanup(null));
     modal.querySelector('[data-crop-apply]').addEventListener('click', () => {

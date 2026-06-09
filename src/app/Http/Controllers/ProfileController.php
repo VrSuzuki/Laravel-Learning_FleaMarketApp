@@ -29,8 +29,8 @@ class ProfileController extends Controller
 
         return view('account.users', [
             'users' => $user->following()->paginate(20),
-            'title' => $user->display_name.'さんのフォロー一覧',
-            'switchLabel' => 'フォロワー一覧へ',
+            'title' => $user->display_name.'さんのフォローリスト',
+            'switchLabel' => 'フォロワーリストへ',
             'switchRoute' => route('profiles.followers', $user),
         ]);
     }
@@ -41,8 +41,8 @@ class ProfileController extends Controller
 
         return view('account.users', [
             'users' => $user->followers()->paginate(20),
-            'title' => $user->display_name.'さんのフォロワー一覧',
-            'switchLabel' => 'フォロー一覧へ',
+            'title' => $user->display_name.'さんのフォロワーリスト',
+            'switchLabel' => 'フォローリストへ',
             'switchRoute' => route('profiles.following', $user),
         ]);
     }

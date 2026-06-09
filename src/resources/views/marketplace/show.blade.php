@@ -16,16 +16,28 @@
               ? $content->images->map->url
               : collect([$content->thumbnail_url]);
         @endphp
-        <div class="detail-image">
-          <img src="{{ $galleryImages->first() }}" alt="{{ $content->title }}">
-        </div>
-        @if($galleryImages->count() > 1)
-          <div class="image-strip">
-            @foreach($galleryImages as $image)
-              <img src="{{ $image }}" alt="{{ $content->title }} 画像{{ $loop->iteration }}">
-            @endforeach
+        <div class="detail-gallery" data-gallery>
+          <div class="detail-image">
+            <img src="{{ $galleryImages->first() }}" alt="{{ $content->title }}" data-gallery-main>
+            @if($galleryImages->count() > 1)
+              <button class="gallery-arrow gallery-arrow--prev" type="button" data-gallery-prev aria-label="前の画像">
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+              </button>
+              <button class="gallery-arrow gallery-arrow--next" type="button" data-gallery-next aria-label="次の画像">
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              </button>
+            @endif
           </div>
-        @endif
+          @if($galleryImages->count() > 1)
+            <div class="image-strip">
+              @foreach($galleryImages as $image)
+                <button class="image-strip__item {{ $loop->first ? 'is-active' : '' }}" type="button" data-gallery-thumb data-gallery-index="{{ $loop->index }}" aria-label="画像{{ $loop->iteration }}を表示">
+                  <img src="{{ $image }}" alt="{{ $content->title }} 画像{{ $loop->iteration }}">
+                </button>
+              @endforeach
+            </div>
+          @endif
+        </div>
 
         <section class="panel" style="margin-top: 16px;">
           <div class="pill-row">

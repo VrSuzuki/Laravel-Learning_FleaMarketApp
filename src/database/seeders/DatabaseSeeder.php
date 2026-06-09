@@ -126,11 +126,15 @@ class DatabaseSeeder extends Seeder
 
             $content = Content::create($attributes);
 
-            ContentImage::create([
-                'content_id' => $content->id,
-                'path' => $thumbnail,
-                'sort_order' => 1,
-            ]);
+            collect([0, 1, 2])->map(function ($offset) use ($index) {
+                return 'assets/generated/asset-'.((($index + $offset) % 12) + 1).'.svg';
+            })->unique()->values()->each(function ($path, $imageIndex) use ($content) {
+                ContentImage::create([
+                    'content_id' => $content->id,
+                    'path' => $path,
+                    'sort_order' => $imageIndex + 1,
+                ]);
+            });
 
             $tagIds = collect($data['tags'])->map(function ($tagName) {
                 return Tag::firstOrCreate(

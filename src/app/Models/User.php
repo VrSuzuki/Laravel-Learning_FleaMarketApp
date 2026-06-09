@@ -92,10 +92,17 @@ class User extends Authenticatable implements MustVerifyEmail
                 return $this->avatar_path;
             }
 
+            if (Str::startsWith($this->avatar_path, ['assets/', '/assets/'])) {
+                return asset(ltrim($this->avatar_path, '/'));
+            }
+
             return asset('storage/'.$this->avatar_path);
         }
 
-        return 'https://api.dicebear.com/8.x/identicon/svg?seed='.urlencode($this->handle ?: $this->email);
+        $seed = $this->handle ?: $this->email ?: (string) $this->id;
+        $index = (abs(crc32($seed)) % 6) + 1;
+
+        return asset('assets/avatars/avatar-'.$index.'.svg');
     }
 
     public function getRouteKeyName()

@@ -123,8 +123,8 @@ class AccountController extends Controller
 
         return view('account.users', [
             'users' => $users,
-            'title' => 'フォロー中',
-            'switchLabel' => 'フォロワーを表示',
+            'title' => auth()->user()->display_name.'さんのフォローリスト',
+            'switchLabel' => 'フォロワーリストへ',
             'switchRoute' => route('followers.index'),
         ]);
     }
@@ -135,8 +135,8 @@ class AccountController extends Controller
 
         return view('account.users', [
             'users' => $users,
-            'title' => 'フォロワー',
-            'switchLabel' => 'フォロー中を表示',
+            'title' => auth()->user()->display_name.'さんのフォロワーリスト',
+            'switchLabel' => 'フォローリストへ',
             'switchRoute' => route('following.index'),
         ]);
     }

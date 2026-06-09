@@ -10,7 +10,7 @@
       <div class="section-heading">
         <div>
           <p class="section-eyebrow">Upload</p>
-          <h1 class="section-title">コンテンツ情報を編集</h1>
+          <h1 class="section-title">{{ $content->exists ? 'コンテンツ情報を編集' : 'コンテンツを投稿' }}</h1>
         </div>
       </div>
       @include('partials.errors')

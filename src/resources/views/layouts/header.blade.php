@@ -85,7 +85,6 @@
             <a class="menu-link" href="{{ route('library.index') }}">ライブラリ</a>
             <a class="menu-link" href="{{ route('purchases.index') }}">購入履歴</a>
             <a class="menu-link" href="{{ route('sales.index') }}">売上管理</a>
-            <a class="menu-link" href="{{ route('sales.index', ['tab' => 'orders']) }}">注文一覧</a>
             <a class="menu-link" href="{{ route('settings.index') }}">設定</a>
             <form method="POST" action="{{ route('logout') }}">
               @csrf

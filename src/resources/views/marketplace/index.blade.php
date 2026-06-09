@@ -32,23 +32,8 @@
           @endforeach
         </div>
       </div>
-      <div class="search-summary__meta">
-        <strong>{{ number_format($contents->total()) }}件ヒット</strong>
-        <form class="toolbar__group" action="{{ route('home') }}" method="GET">
-          @foreach(request()->except(['sort', 'per_page', 'page']) as $key => $value)
-            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-          @endforeach
-          <select class="select" name="sort" aria-label="表示順序" onchange="this.form.submit()">
-            @foreach($sorts as $key => $label)
-              <option value="{{ $key }}" {{ request('sort', 'newest') === $key ? 'selected' : '' }}>{{ $label }}</option>
-            @endforeach
-          </select>
-          <select class="select" name="per_page" aria-label="表示件数" onchange="this.form.submit()">
-            @foreach([20, 50, 100] as $count)
-              <option value="{{ $count }}" {{ (int) request('per_page', 20) === $count ? 'selected' : '' }}>{{ $count }}件</option>
-            @endforeach
-          </select>
-        </form>
+      <div class="search-summary__actions">
+        <a class="button button--soft" href="{{ route('home') }}">検索条件をリセット</a>
       </div>
     </section>
 
@@ -96,9 +81,29 @@
             <p class="section-eyebrow">Assets</p>
             <h2 class="section-title" id="items-title">投稿されたコンテンツ</h2>
           </div>
-          <div class="inline-actions">
-            <a class="nav-link" href="{{ route('search.advanced') }}">詳細検索へ</a>
-            <a class="nav-link" href="{{ route('home') }}">検索条件をリセット</a>
+          <div class="listing-toolbar">
+            <strong>{{ number_format($contents->total()) }}件ヒット</strong>
+            <form class="listing-toolbar__form" action="{{ route('home') }}" method="GET">
+              @foreach(request()->except(['sort', 'per_page', 'page']) as $key => $value)
+                @if(is_array($value))
+                  @foreach($value as $item)
+                    <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
+                  @endforeach
+                @else
+                  <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endif
+              @endforeach
+              <select class="select" name="per_page" aria-label="表示件数" onchange="this.form.submit()">
+                @foreach([20, 50, 100] as $count)
+                  <option value="{{ $count }}" {{ (int) request('per_page', 20) === $count ? 'selected' : '' }}>{{ $count }}件</option>
+                @endforeach
+              </select>
+              <select class="select" name="sort" aria-label="表示順序" onchange="this.form.submit()">
+                @foreach($sorts as $key => $label)
+                  <option value="{{ $key }}" {{ request('sort', 'newest') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+              </select>
+            </form>
           </div>
         </div>
 

@@ -1,5 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Avatar">
-  <rect width="160" height="160" rx="32" fill="#0d1424"/>
-  <circle cx="80" cy="64" r="34" fill="#ffffff"/>
-  <path d="M28 150c10-34 36-52 52-52s42 18 52 52z" fill="#ffcf5a"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Digital avatar mono">
+  <defs>
+    <linearGradient id="g" x1="18" y1="142" x2="142" y2="18" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0b1020"/>
+      <stop offset="1" stop-color="#253044"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="32" fill="url(#g)"/>
+  <path d="M30 38h34M96 38h34M30 122h34M96 122h34M42 38v84M118 38v84" stroke="#dbe7ff" stroke-width="5" stroke-linecap="round" opacity=".72"/>
+  <circle cx="80" cy="68" r="35" fill="#f7fbff"/>
+  <path d="M38 142c9-32 30-50 42-50s33 18 42 50z" fill="#dbe7ff"/>
+  <path d="M60 65h16M84 65h16" stroke="#101624" stroke-width="6" stroke-linecap="round"/>
+  <path d="M69 85h22" stroke="#101624" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="126" cy="38" r="8" fill="#20c7d2"/>
 </svg>
