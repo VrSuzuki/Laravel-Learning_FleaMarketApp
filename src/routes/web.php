@@ -6,6 +6,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContentManageController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -16,8 +17,10 @@ Route::get('/search', [MarketplaceController::class, 'search'])->name('search.ad
 Route::get('/users/{user:handle}', [ProfileController::class, 'show'])->name('profiles.show');
 Route::get('/users/{user:handle}/following', [ProfileController::class, 'following'])->name('profiles.following');
 Route::get('/users/{user:handle}/followers', [ProfileController::class, 'followers'])->name('profiles.followers');
+Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->middleware('guest')->name('auth.google.redirect');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->middleware('guest')->name('auth.google.callback');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profiles.update');
 

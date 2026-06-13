@@ -8,6 +8,7 @@ use App\Models\Genre;
 use App\Models\SubGenre;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -58,6 +59,8 @@ class ContentManageController extends Controller
     {
         abort_unless($content->user_id === $request->user()->id, 403);
         $this->ensureImageLimit($request, $content);
+        $this->deleteImages($request, $content);
+        $content->refresh();
 
         $data = $this->payload($request, $content);
 
@@ -143,11 +146,47 @@ class ContentManageController extends Controller
     private function ensureImageLimit(StoreContentRequest $request, Content $content)
     {
         $newImageCount = collect($request->file('images', []))->filter()->count();
-        $currentCount = $content->exists ? $content->images()->count() : 0;
+        $deleteIds = collect($request->input('delete_image_ids', []))->map(fn ($id) => (int) $id)->filter();
+        $currentCount = $content->exists
+            ? $content->images()->when($deleteIds->isNotEmpty(), fn ($query) => $query->whereNotIn('id', $deleteIds))->count()
+            : 0;
 
         if ($currentCount + $newImageCount > 20) {
             throw ValidationException::withMessages([
                 'images' => 'コンテンツ画像は最大20枚まで追加できます。',
+            ]);
+        }
+    }
+
+    private function deleteImages(StoreContentRequest $request, Content $content)
+    {
+        $deleteIds = collect($request->input('delete_image_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique();
+
+        if ($deleteIds->isEmpty()) {
+            return;
+        }
+
+        $images = $content->images()->whereIn('id', $deleteIds)->get();
+        $deletedPaths = $images->pluck('path');
+
+        foreach ($images as $image) {
+            if (!Str::startsWith($image->path, ['assets/', '/assets/', 'http://', 'https://'])) {
+                Storage::disk('public')->delete($image->path);
+            }
+
+            $image->delete();
+        }
+
+        $content->images()->orderBy('sort_order')->get()->values()->each(function ($image, $index) {
+            $image->update(['sort_order' => $index + 1]);
+        });
+
+        if ($deletedPaths->contains($content->thumbnail_path)) {
+            $content->update([
+                'thumbnail_path' => optional($content->images()->orderBy('sort_order')->first())->path,
             ]);
         }
     }
@@ -173,15 +212,31 @@ class ContentManageController extends Controller
             ->map(function ($name) {
                 $name = trim($name);
 
-                return Tag::firstOrCreate(
-                    ['name' => $name],
-                    ['slug' => Str::slug($name) ?: Str::random(10)]
-                )->id;
+                return $this->tagId($name);
             })
             ->unique()
             ->values();
 
         $content->tags()->sync($tagIds);
+    }
+
+    private function tagId(string $name)
+    {
+        $tag = Tag::where('name', $name)->first();
+
+        if ($tag) {
+            return $tag->id;
+        }
+
+        $base = Str::slug($name) ?: 'tag';
+        $slug = $base;
+        $count = 2;
+
+        while (Tag::where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$count++;
+        }
+
+        return Tag::create(['name' => $name, 'slug' => $slug])->id;
     }
 
     private function formats()

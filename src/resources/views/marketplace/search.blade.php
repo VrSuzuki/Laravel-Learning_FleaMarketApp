@@ -61,8 +61,11 @@
               <strong>￥<span data-min-label>{{ number_format(request('min_price', 0)) }}</span></strong>
               <strong>￥<span data-max-label>{{ number_format(request('max_price', 10000)) }}</span></strong>
             </div>
-            <input type="range" name="min_price" min="0" max="10000" step="500" value="{{ request('min_price', 0) }}" aria-label="下限価格">
-            <input type="range" name="max_price" min="0" max="10000" step="500" value="{{ request('max_price', 10000) }}" aria-label="上限価格">
+            <div class="dual-range__control">
+              <div class="dual-range__track" aria-hidden="true"></div>
+              <input class="dual-range__input dual-range__input--min" type="range" name="min_price" min="0" max="10000" step="500" value="{{ request('min_price', 0) }}" aria-label="下限価格">
+              <input class="dual-range__input dual-range__input--max" type="range" name="max_price" min="0" max="10000" step="500" value="{{ request('max_price', 10000) }}" aria-label="上限価格">
+            </div>
           </div>
         </div>
         <div class="field">

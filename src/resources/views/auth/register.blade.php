@@ -8,7 +8,13 @@
   <main class="auth-main">
     <section class="auth-card">
       <h1>アカウント登録画面</h1>
+      @include('partials.flash')
       @include('partials.errors')
+      <a class="social-auth-button" href="{{ route('auth.google.redirect') }}">
+        <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+        Googleアカウントで登録
+      </a>
+      <div class="auth-divider"><span>またはメールアドレスで登録</span></div>
       <form method="POST" action="{{ route('register') }}" novalidate>
         @csrf
         <div class="form-grid form-grid--single">

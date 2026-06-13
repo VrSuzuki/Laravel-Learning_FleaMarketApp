@@ -304,6 +304,7 @@ textarea {
   grid-template-columns: 34px 1fr;
   gap: 10px;
   align-items: center;
+  min-width: 0;
   padding: 8px;
   border-radius: 8px;
 }
@@ -325,6 +326,13 @@ textarea {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
+}
+
+.notice-mini span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-main,
@@ -354,6 +362,17 @@ textarea {
 .hero__content {
   max-width: 720px;
   padding: clamp(28px, 6vw, 68px);
+}
+
+.hero .about-hero-title {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1.22;
+}
+
+.about-hero-title span {
+  display: block;
+  white-space: nowrap;
 }
 
 .eyebrow,
@@ -1059,6 +1078,47 @@ textarea {
   font-size: 28px;
 }
 
+.auth-lead {
+  color: var(--muted);
+}
+
+.social-auth-button {
+  display: flex;
+  width: 100%;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--ink);
+  background: #ffffff;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  font-weight: 900;
+}
+
+.social-auth-button:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(32, 199, 210, .12);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  flex: 1;
+  height: 1px;
+  content: "";
+  background: var(--line);
+}
+
 .flash,
 .error-box {
   margin-bottom: 16px;
@@ -1123,7 +1183,7 @@ textarea {
 
 .image-record {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-columns: 96px minmax(0, 1fr) 38px;
   gap: 12px;
   align-items: center;
   padding: 10px;
@@ -1140,9 +1200,23 @@ textarea {
   border-radius: 8px;
 }
 
-.dual-range {
+.image-record__remove {
   display: grid;
-  gap: 8px;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: #ffffff;
+  background: #cf334c;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.dual-range {
+  --range-min: 0%;
+  --range-max: 100%;
+  display: grid;
+  gap: 12px;
   padding: 14px;
   background: var(--surface-2);
   border: 1px solid var(--line);
@@ -1156,9 +1230,73 @@ textarea {
   color: var(--ink-soft);
 }
 
+.dual-range__control {
+  position: relative;
+  height: 34px;
+}
+
+.dual-range__track {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 7px;
+  background: linear-gradient(to right, #cddce7 0 var(--range-min), var(--cyan) var(--range-min) var(--range-max), #cddce7 var(--range-max) 100%);
+  border-radius: 999px;
+  transform: translateY(-50%);
+}
+
 .dual-range input[type="range"] {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  accent-color: var(--cyan);
+  height: 34px;
+  margin: 0;
+  pointer-events: none;
+  appearance: none;
+  background: transparent;
+}
+
+.dual-range input[type="range"]::-webkit-slider-runnable-track {
+  height: 7px;
+  background: transparent;
+}
+
+.dual-range input[type="range"]::-moz-range-track {
+  height: 7px;
+  background: transparent;
+}
+
+.dual-range input[type="range"]::-webkit-slider-thumb {
+  width: 22px;
+  height: 22px;
+  margin-top: -7.5px;
+  pointer-events: auto;
+  appearance: none;
+  background: #ffffff;
+  border: 5px solid var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(16, 22, 36, .24);
+  cursor: pointer;
+}
+
+.dual-range input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  pointer-events: auto;
+  background: #ffffff;
+  border: 5px solid var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(16, 22, 36, .24);
+  cursor: pointer;
+}
+
+.dual-range__input--min {
+  z-index: 2;
+}
+
+.dual-range__input--max {
+  z-index: 3;
 }
 
 .toggle-row {
@@ -1580,6 +1718,14 @@ textarea {
 
   .hero {
     min-height: 360px;
+  }
+
+  .page-about .hero__content {
+    padding: 28px 18px;
+  }
+
+  .hero .about-hero-title {
+    font-size: 20px;
   }
 
   .content-grid,

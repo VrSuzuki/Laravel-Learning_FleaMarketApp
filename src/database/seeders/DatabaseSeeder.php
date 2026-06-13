@@ -71,11 +71,11 @@ class DatabaseSeeder extends Seeder
                 'description' => $genreData['description'],
             ]);
 
-            foreach ($genreData['sub_genres'] as $subGenre) {
+            foreach ($genreData['sub_genres'] as $index => $subGenre) {
                 SubGenre::create([
                     'genre_id' => $genre->id,
                     'name' => $subGenre,
-                    'slug' => $genreData['slug'].'-'.Str::slug($subGenre).'-'.Str::random(4),
+                    'slug' => $genreData['slug'].'-'.($index + 1),
                 ]);
             }
 
@@ -98,7 +98,14 @@ class DatabaseSeeder extends Seeder
 
     private function seedContents($genres, $users)
     {
-        return collect($this->contents())->map(function ($data, $index) use ($genres, $users) {
+        $contentData = collect($this->contents());
+        $coveredGenres = $contentData->pluck('genre')->unique();
+
+        $genres->keys()->diff($coveredGenres)->each(function ($genreSlug) use ($genres, &$contentData) {
+            $contentData->push($this->demoContentForGenre($genreSlug, $genres[$genreSlug]));
+        });
+
+        return $contentData->values()->map(function ($data, $index) use ($genres, $users) {
             $genre = $genres[$data['genre']];
             $subGenre = $genre->subGenres->firstWhere('name', $data['sub']);
             $author = $users[$index % $users->count()];
@@ -137,16 +144,32 @@ class DatabaseSeeder extends Seeder
             });
 
             $tagIds = collect($data['tags'])->map(function ($tagName) {
-                return Tag::firstOrCreate(
-                    ['name' => $tagName],
-                    ['slug' => Str::slug($tagName) ?: Str::random(8)]
-                )->id;
+                return $this->tagId($tagName);
             });
 
             $content->tags()->sync($tagIds);
 
             return $content;
         });
+    }
+
+    private function tagId(string $name)
+    {
+        $tag = Tag::where('name', $name)->first();
+
+        if ($tag) {
+            return $tag->id;
+        }
+
+        $base = Str::slug($name) ?: 'tag';
+        $slug = $base;
+        $count = 2;
+
+        while (Tag::where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$count++;
+        }
+
+        return Tag::create(['name' => $name, 'slug' => $slug])->id;
     }
 
     private function seedSocialData($users, $contents)
@@ -223,6 +246,43 @@ class DatabaseSeeder extends Seeder
         });
     }
 
+    private function demoContentForGenre(string $genreSlug, Genre $genre)
+    {
+        $subGenre = $genre->subGenres->first();
+
+        return [
+            'title' => $genre->name.'スターターパック',
+            'genre' => $genreSlug,
+            'sub' => $subGenre->name,
+            'format' => $this->formatForGenre($genreSlug),
+            'price' => collect([0, 600, 900, 1200, 1800, 2400, 3200])->random(),
+            'environment' => 'Windows / macOS / ブラウザ',
+            'size' => collect([1.8, 3.4, 6.2, 12.7, 24.5, 48.0])->random(),
+            'tags' => [$genre->name, $subGenre->name, 'デモ'],
+            'description' => $genre->description.' '.$subGenre->name.'からすぐ試せるサンプルデータをまとめた、ポートフォリオ確認用のスターターセットです。',
+        ];
+    }
+
+    private function formatForGenre(string $genreSlug)
+    {
+        $formats = [
+            'audio-music' => 'audio',
+            'video-motion' => 'video',
+            'three-d-vr' => 'model_3d',
+            'game-assets' => 'system',
+            'fonts-typography' => 'text',
+            'prompts-ai' => 'text',
+            'datasets' => 'external_tool',
+            'cad-blueprints' => 'model_3d',
+            'stock-photo' => 'image',
+            'ebooks-zines' => 'text',
+            'web-themes' => 'system',
+            'mobile-assets' => 'system',
+        ];
+
+        return $formats[$genreSlug] ?? 'external_tool';
+    }
+
     private function genres()
     {
         return [
@@ -261,6 +321,150 @@ class DatabaseSeeder extends Seeder
                 'slug' => 'creative',
                 'description' => '画像、音声、動画、3Dモデルなど制作のための素材。',
                 'sub_genres' => ['画像素材', '動画素材', '3Dモデル', '音声素材', 'フォントリスト', '配信素材'],
+            ],
+            [
+                'name' => '写真・ストック素材',
+                'slug' => 'stock-photo',
+                'description' => 'Web、資料、広告、SNSに使いやすい写真・背景・テクスチャ素材。',
+                'sub_genres' => ['人物写真', '風景写真', '商品写真', '背景テクスチャ', '資料表紙', 'SNS素材'],
+            ],
+            [
+                'name' => 'イラスト・漫画素材',
+                'slug' => 'illustration-comic',
+                'description' => 'アイコン、挿絵、漫画制作、配信用に使える描画素材。',
+                'sub_genres' => ['キャラクター', '背景イラスト', '表情差分', '漫画トーン', '吹き出し', 'アイコンセット'],
+            ],
+            [
+                'name' => '音楽・音声',
+                'slug' => 'audio-music',
+                'description' => 'BGM、効果音、ボイス、ポッドキャスト制作を支える音声データ。',
+                'sub_genres' => ['BGM', '効果音', 'ジングル', 'ボイス素材', '環境音', '音声編集プリセット'],
+            ],
+            [
+                'name' => '動画・モーション',
+                'slug' => 'video-motion',
+                'description' => '動画編集、配信、広告、教材づくりに使える映像素材。',
+                'sub_genres' => ['トランジション', 'モーショングラフィックス', '字幕テンプレート', 'LUT', '縦動画テンプレート', '教材動画素材'],
+            ],
+            [
+                'name' => '3D・VR/AR',
+                'slug' => 'three-d-vr',
+                'description' => '3Dモデル、VRChat、AR表示、ゲーム開発向けの立体データ。',
+                'sub_genres' => ['3Dモデル', 'VRMアバター', 'マテリアル', 'モーション', '背景ワールド', 'AR配置データ'],
+            ],
+            [
+                'name' => 'ゲーム制作',
+                'slug' => 'game-assets',
+                'description' => 'ゲーム開発に使う素材、UI、シナリオ、レベルデザイン資料。',
+                'sub_genres' => ['2Dスプライト', 'タイルマップ', 'ゲームUI', 'シナリオ', 'レベルデザイン', 'サウンドパック'],
+            ],
+            [
+                'name' => 'フォント・タイポグラフィ',
+                'slug' => 'fonts-typography',
+                'description' => 'フォント、文字組み、見出しデザイン、ライセンス整理の資料。',
+                'sub_genres' => ['欧文フォント', '日本語フォント', '手書き風', '見出しテンプレート', '文字組み資料', 'ライセンス表'],
+            ],
+            [
+                'name' => 'AI・プロンプト',
+                'slug' => 'prompts-ai',
+                'description' => '生成AIを業務、制作、学習、分析に活用するためのプロンプトと設定。',
+                'sub_genres' => ['文章生成', '画像生成', 'コード支援', '業務自動化', '学習支援', 'AIエージェント'],
+            ],
+            [
+                'name' => 'データセット・分析',
+                'slug' => 'datasets',
+                'description' => '学習用CSV、分析サンプル、可視化、機械学習向けのデータ。',
+                'sub_genres' => ['CSVデータ', 'ダッシュボード', '機械学習', '統計教材', 'BIテンプレート', 'スクレイピング結果'],
+            ],
+            [
+                'name' => 'Webテーマ・UI',
+                'slug' => 'web-themes',
+                'description' => 'Webサイト、管理画面、LP、UIキットに使えるフロントエンド資産。',
+                'sub_genres' => ['HTMLテンプレート', 'CSSコンポーネント', '管理画面UI', 'LPテンプレート', 'Figma連携', 'アクセシビリティ部品'],
+            ],
+            [
+                'name' => 'モバイルアプリ素材',
+                'slug' => 'mobile-assets',
+                'description' => 'スマホアプリのUI、アイコン、オンボーディング、実装雛形。',
+                'sub_genres' => ['iOS UI', 'Android UI', 'アプリアイコン', 'オンボーディング', '通知文面', 'React Native雛形'],
+            ],
+            [
+                'name' => 'WordPress・CMS',
+                'slug' => 'wordpress-cms',
+                'description' => 'CMSサイト制作、ブログ運営、テーマ、プラグイン設定に関するデータ。',
+                'sub_genres' => ['テーマ雛形', 'プラグイン設定', 'ブログ設計', 'SEOチェック', '投稿テンプレート', '保守資料'],
+            ],
+            [
+                'name' => '電子書籍・文章',
+                'slug' => 'ebooks-zines',
+                'description' => '電子書籍、ZINE、記事、台本、長文制作のためのデジタル文書。',
+                'sub_genres' => ['電子書籍', 'ZINE', '記事テンプレート', '台本', '校正チェック', '出版準備'],
+            ],
+            [
+                'name' => 'プレゼン・スライド',
+                'slug' => 'presentations',
+                'description' => '講義、営業、採用、研究発表などに使えるスライド資産。',
+                'sub_genres' => ['営業資料', '講義スライド', '研究発表', 'ピッチ資料', '図解パーツ', '研修資料'],
+            ],
+            [
+                'name' => 'スプレッドシート',
+                'slug' => 'spreadsheets',
+                'description' => 'Excel、Google Sheets、集計、自動化、管理表のテンプレート。',
+                'sub_genres' => ['家計簿', '売上管理', '在庫管理', '進捗管理', '関数サンプル', 'GAS連携'],
+            ],
+            [
+                'name' => '法務・契約',
+                'slug' => 'legal-contracts',
+                'description' => '契約書、規約、チェックリストなど事業運営を助ける文書テンプレート。',
+                'sub_genres' => ['業務委託契約', '利用規約', 'プライバシーポリシー', 'NDA', '請求書文面', 'チェックリスト'],
+            ],
+            [
+                'name' => '会計・税務',
+                'slug' => 'accounting-tax',
+                'description' => '個人事業、副業、確定申告、経理処理を楽にするデータ。',
+                'sub_genres' => ['確定申告', '請求書', '経費管理', '売上台帳', '税務メモ', '予算管理'],
+            ],
+            [
+                'name' => 'マーケティング',
+                'slug' => 'marketing',
+                'description' => '広告、SNS、SEO、分析、キャンペーン運用に使う実務データ。',
+                'sub_genres' => ['SNS投稿', '広告文', 'SEO', 'アクセス解析', 'キャンペーン', 'ペルソナ設計'],
+            ],
+            [
+                'name' => '店舗・イベント',
+                'slug' => 'stores-events',
+                'description' => '小売、飲食、展示会、同人イベント、ライブ運営向けのデジタル資料。',
+                'sub_genres' => ['POP', 'メニュー表', 'シフト表', 'イベント進行', '出展準備', '接客マニュアル'],
+            ],
+            [
+                'name' => '建築・CAD',
+                'slug' => 'cad-blueprints',
+                'description' => 'CAD、図面、インテリア、施工管理、DIYに使える設計データ。',
+                'sub_genres' => ['CAD図面', '3D家具', '間取り', '施工チェック', 'DIY設計', '内装資料'],
+            ],
+            [
+                'name' => '医療・ヘルスケア',
+                'slug' => 'healthcare',
+                'description' => '健康記録、介護、運動、栄養、医療事務に役立つテンプレート。',
+                'sub_genres' => ['健康ログ', '服薬管理', '栄養管理', '運動計画', '介護記録', '医療事務'],
+            ],
+            [
+                'name' => '研究・論文',
+                'slug' => 'research-papers',
+                'description' => '研究計画、調査、論文執筆、実験記録、参考文献管理の資料。',
+                'sub_genres' => ['研究計画', '調査票', '実験ノート', '論文テンプレート', '参考文献', '分析メモ'],
+            ],
+            [
+                'name' => '語学・翻訳',
+                'slug' => 'language-translation',
+                'description' => '語学学習、翻訳、字幕、発音練習、単語帳に使えるデータ。',
+                'sub_genres' => ['単語帳', '文法教材', '翻訳メモリ', '字幕ファイル', '発音練習', '多言語UI'],
+            ],
+            [
+                'name' => '生活・趣味',
+                'slug' => 'hobby-life',
+                'description' => '料理、旅行、読書、整理整頓、趣味活動を支えるデジタル資料。',
+                'sub_genres' => ['レシピ', '旅行計画', '読書記録', '家事チェック', '趣味ログ', 'コレクション管理'],
             ],
         ];
     }
