@@ -44,7 +44,7 @@ docker compose exec php php artisan db:seed
 もしもブラウザ(`http://localhost/`)にて権限に関するエラーが表示されていた場合は以下のコマンドを「DisitalAssetPort」ディレクトリ直下で実行してみてください。
 
 ```
-docker compose exec php chmod -R 775 storage bootstrap/cache
+docker compose exec php chmod -R 777 storage bootstrap/cache
 ```
 
 ## サンプルアカウント
