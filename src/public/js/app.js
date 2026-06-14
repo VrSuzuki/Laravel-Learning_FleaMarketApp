@@ -11,6 +11,8 @@ document.querySelectorAll('[data-dual-range]').forEach(range => {
   const maxInput = range.querySelector('input[name="max_price"]');
   const minLabel = range.querySelector('[data-min-label]');
   const maxLabel = range.querySelector('[data-max-label]');
+  const minValue = Number(minInput.min || 0);
+  const maxValue = Number(maxInput.max || 100);
 
   const sync = changed => {
     let min = Number(minInput.value);
@@ -28,6 +30,8 @@ document.querySelectorAll('[data-dual-range]').forEach(range => {
 
     minLabel.textContent = min.toLocaleString();
     maxLabel.textContent = max.toLocaleString();
+    range.style.setProperty('--range-min', `${((min - minValue) / (maxValue - minValue)) * 100}%`);
+    range.style.setProperty('--range-max', `${((max - minValue) / (maxValue - minValue)) * 100}%`);
   };
 
   minInput.addEventListener('input', () => sync(minInput));
@@ -135,6 +139,20 @@ document.querySelectorAll('[data-image-repeater]').forEach(wrapper => {
 
     input.files = transfer.files;
   });
+});
+
+document.addEventListener('click', event => {
+  const button = event.target.closest('[data-delete-image]');
+  if (!button) return;
+
+  const form = button.closest('form');
+  const record = button.closest('[data-image-record]');
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'delete_image_ids[]';
+  input.value = button.dataset.deleteImage;
+  form.appendChild(input);
+  record.remove();
 });
 
 function fixedAspect(value) {

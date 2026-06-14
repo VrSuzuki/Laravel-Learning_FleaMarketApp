@@ -26,6 +26,8 @@ class StoreContentRequest extends FormRequest
             'thumbnail' => ['nullable', 'image', 'max:5120'],
             'images' => ['nullable', 'array', 'max:20'],
             'images.*' => ['nullable', 'image', 'max:5120'],
+            'delete_image_ids' => ['nullable', 'array'],
+            'delete_image_ids.*' => ['integer'],
             'content_file' => ['nullable', 'file', 'max:102400'],
         ];
     }

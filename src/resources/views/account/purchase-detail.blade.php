@@ -21,7 +21,7 @@
         <article class="record">
           <img src="{{ $item->content->thumbnail_url }}" alt="{{ $item->content->title }}">
           <div>
-            <h2>{{ $item->content->title }}</h2>
+            <h2><a href="{{ route('contents.show', $item->content) }}">{{ $item->content->title }}</a></h2>
             <p style="color: var(--muted);">
               <a href="{{ route('profiles.show', $item->content->author) }}">{{ $item->content->author->display_name }}</a>
             </p>

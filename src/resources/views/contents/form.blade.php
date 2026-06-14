@@ -63,9 +63,12 @@
               <div class="image-repeater__list" data-image-list>
                 @if($content->exists && $content->images->count())
                   @foreach($content->images as $image)
-                    <div class="image-record">
+                    <div class="image-record" data-image-record>
                       <img src="{{ $image->url }}" alt="登録済みコンテンツ画像{{ $loop->iteration }}">
                       <span>登録済み画像 {{ $loop->iteration }}</span>
+                      <button class="image-record__remove" type="button" data-delete-image="{{ $image->id }}" aria-label="画像を削除">
+                        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                      </button>
                     </div>
                   @endforeach
                 @elseif($content->thumbnail_path)

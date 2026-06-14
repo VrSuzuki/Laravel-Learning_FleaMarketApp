@@ -8,6 +8,6 @@ class RegisterResponse implements RegisterResponseContract
 {
     public function toResponse($request)
     {
-        return redirect()->route('profiles.edit');
+        return redirect()->route('verification.notice');
     }
 }

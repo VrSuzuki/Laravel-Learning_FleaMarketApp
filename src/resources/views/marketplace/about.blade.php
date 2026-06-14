@@ -10,7 +10,10 @@
     <section class="hero hero--image" aria-labelledby="about-title">
       <div class="hero__content">
         <p class="eyebrow">DigitalAssetPort</p>
-        <h1 id="about-title">どんなデータでも置ける<br>総合マーケットプレイス</h1>
+        <h1 id="about-title" class="about-hero-title">
+          <span>どんなデータでも置ける</span>
+          <span>総合マーケットプレイス</span>
+        </h1>
         <p>作業を速くするテンプレート、学びを深める教材、AIをより使いやすくするプロンプト、無料フォントをまとめたリスト、すぐ試せるシステム。PCを利用する様々な人々が、ファイルとして渡せるものを持ち寄るマーケットです。</p>
       </div>
     </section>
@@ -50,6 +53,30 @@
                   @case('daily-life') home_health @break
                   @case('code-system') code_blocks @break
                   @case('education') school @break
+                  @case('stock-photo') photo_library @break
+                  @case('illustration-comic') draw @break
+                  @case('audio-music') graphic_eq @break
+                  @case('video-motion') movie @break
+                  @case('three-d-vr') deployed_code @break
+                  @case('game-assets') sports_esports @break
+                  @case('fonts-typography') text_fields @break
+                  @case('prompts-ai') smart_toy @break
+                  @case('datasets') database @break
+                  @case('web-themes') web_asset @break
+                  @case('mobile-assets') smartphone @break
+                  @case('wordpress-cms') language @break
+                  @case('ebooks-zines') menu_book @break
+                  @case('presentations') slideshow @break
+                  @case('spreadsheets') table_chart @break
+                  @case('legal-contracts') gavel @break
+                  @case('accounting-tax') receipt_long @break
+                  @case('marketing') campaign @break
+                  @case('stores-events') store @break
+                  @case('cad-blueprints') architecture @break
+                  @case('healthcare') health_and_safety @break
+                  @case('research-papers') science @break
+                  @case('language-translation') translate @break
+                  @case('hobby-life') interests @break
                   @default palette
                 @endswitch
               </span>

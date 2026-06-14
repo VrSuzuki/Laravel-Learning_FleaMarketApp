@@ -146,7 +146,7 @@
               <form method="POST" action="{{ route('favorites.toggle', $content) }}">
                 @csrf
                 <button class="favorite-pill favorite-pill--large {{ $isFavorite ? 'is-active' : '' }}" type="submit" aria-label="お気に入り">
-                  <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">{{ $isFavorite ? 'favorite' : 'favorite_border' }}</span>
                   {{ number_format($content->favorites_count) }}
                 </button>
               </form>

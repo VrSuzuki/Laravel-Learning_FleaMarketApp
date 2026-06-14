@@ -18,6 +18,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'nickname',
         'email',
+        'google_id',
+        'google_avatar_url',
         'avatar_path',
         'bio',
         'password',
@@ -97,6 +99,10 @@ class User extends Authenticatable implements MustVerifyEmail
             }
 
             return asset('storage/'.$this->avatar_path);
+        }
+
+        if ($this->google_avatar_url) {
+            return $this->google_avatar_url;
         }
 
         $seed = $this->handle ?: $this->email ?: (string) $this->id;

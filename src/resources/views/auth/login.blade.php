@@ -10,6 +10,11 @@
       <h1>ログイン画面</h1>
       @include('partials.flash')
       @include('partials.errors')
+      <a class="social-auth-button" href="{{ route('auth.google.redirect') }}">
+        <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+        Googleアカウントでログイン
+      </a>
+      <div class="auth-divider"><span>またはメールアドレスでログイン</span></div>
       <form method="POST" action="{{ route('login') }}" novalidate>
         @csrf
         <div class="form-grid form-grid--single">
